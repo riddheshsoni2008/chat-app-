@@ -1,37 +1,30 @@
 import { useState, useEffect } from "react";
 import { io } from "socket.io-client";
 
+// socket connection
+const socket = io("https://chat-app-olcd.onrender.com", {
+  transports: ["websocket", "polling"],
+});
+
 function App() {
-  const [socket, setSocket] = useState(null);
   const [username, setUsername] = useState("");
   const [nameInput, setNameInput] = useState("");
   const [room] = useState("riddhesh-riya");
   const [message, setMessage] = useState("");
   const [chat, setChat] = useState([]);
 
-  // socket connect
-  io.on("connection", (socket) => {
-    console.log("User connected:", socket.id);
-
-    socket.on("join_room", (room) => {
-      socket.join(room);
-    });
-
-    socket.on("send_message", (data) => {
-      console.log("message:", data);
-      socket.to(data.room).emit("receive_message", data);
-    });
-  });
-
+  // join chat
   const joinChat = () => {
-    if (nameInput !== "" && socket) {
+    if (nameInput.trim() !== "") {
       setUsername(nameInput);
+
       socket.emit("join_room", room);
     }
   };
 
+  // send message
   const sendMessage = () => {
-    if (message === "" || !socket) return;
+    if (message.trim() === "") return;
 
     const messageData = {
       room: room,
@@ -47,6 +40,18 @@ function App() {
     setMessage("");
   };
 
+  // receive message
+  useEffect(() => {
+    socket.on("receive_message", (data) => {
+      setChat((prev) => [...prev, data]);
+    });
+
+    return () => {
+      socket.off("receive_message");
+    };
+  }, []);
+
+  // login screen
   if (!username) {
     return (
       <div className="h-screen flex items-center justify-center bg-gray-100">
@@ -70,6 +75,7 @@ function App() {
     );
   }
 
+  // chat UI
   return (
     <div className="h-screen flex justify-center items-center bg-gray-100">
       <div className="w-full max-w-md h-full md:h-[600px] bg-white flex flex-col shadow-lg">
@@ -88,6 +94,7 @@ function App() {
               }`}
             >
               <p className="text-xs opacity-70">{msg.user}</p>
+
               {msg.text}
             </div>
           ))}
