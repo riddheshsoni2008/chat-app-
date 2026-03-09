@@ -30,3 +30,16 @@ const PORT = process.env.PORT || 3001;
 server.listen(PORT, () => {
   console.log("Server running on port", PORT);
 });
+
+io.on("connection", (socket) => {
+  console.log("User connected:", socket.id);
+
+  socket.on("join_room", (room) => {
+    socket.join(room);
+  });
+
+  socket.on("send_message", (data) => {
+    console.log("message:", data);
+    socket.to(data.room).emit("receive_message", data);
+  });
+});

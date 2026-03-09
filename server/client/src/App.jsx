@@ -11,8 +11,16 @@ function App() {
 
   // socket connect
   useEffect(() => {
-    const newSocket = io("https://chat-app-olcd.onrender.com");
+    const newSocket = io("https://chat-app-olcd.onrender.com", {
+      transports: ["websocket", "polling"],
+      withCredentials: false,
+    });
+
     setSocket(newSocket);
+
+    newSocket.on("connect", () => {
+      console.log("Connected:", newSocket.id);
+    });
 
     newSocket.on("receive_message", (data) => {
       setChat((prev) => [...prev, data]);
