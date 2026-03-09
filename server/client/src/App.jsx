@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { io } from "socket.io-client";
 
 // socket connection
-const socket = io("https://chat-app-olcd.onrender.com", {
+const socket = io("https://chat-app-o1cd.onrender.com", {
   transports: ["websocket", "polling"],
 });
 
