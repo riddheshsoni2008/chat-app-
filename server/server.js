@@ -7,7 +7,7 @@ const app = express();
 app.use(cors());
 
 app.get("/", (req, res) => {
-  res.send("Server running");
+  res.send("Server running 🚀");
 });
 
 const server = http.createServer(app);
@@ -15,6 +15,7 @@ const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
     origin: "*",
+    methods: ["GET", "POST"],
   },
 });
 
@@ -36,7 +37,7 @@ io.on("connection", (socket) => {
   });
 });
 
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT; // ❗ IMPORTANT for Render
 
 server.listen(PORT, () => {
   console.log("Server running on port", PORT);
