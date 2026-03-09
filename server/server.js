@@ -13,14 +13,19 @@ const io = new Server(server, {
     origin: "*",
     methods: ["GET", "POST"],
   },
+  pingTimeout: 60000,
+  pingInterval: 25000,
 });
 
 io.on("connection", (socket) => {
+  console.log("User connected:", socket.id);
+
   socket.on("join_room", (room) => {
     socket.join(room);
   });
 
   socket.on("send_message", (data) => {
+    console.log("message:", data);
     socket.to(data.room).emit("receive_message", data);
   });
 });

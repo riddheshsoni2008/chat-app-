@@ -10,26 +10,18 @@ function App() {
   const [chat, setChat] = useState([]);
 
   // socket connect
-  useEffect(() => {
-    const newSocket = io("https://chat-app-olcd.onrender.com", {
-      transports: ["websocket", "polling"],
-      withCredentials: false,
-    });
+  io.on("connection", (socket) => {
+  console.log("User connected:", socket.id);
 
-    setSocket(newSocket);
+  socket.on("join_room", (room) => {
+    socket.join(room);
+  });
 
-    newSocket.on("connect", () => {
-      console.log("Connected:", newSocket.id);
-    });
-
-    newSocket.on("receive_message", (data) => {
-      setChat((prev) => [...prev, data]);
-    });
-
-    return () => {
-      newSocket.disconnect();
-    };
-  }, []);
+  socket.on("send_message", (data) => {
+    console.log("message:", data);
+    socket.to(data.room).emit("receive_message", data);
+  });
+});
 
   const joinChat = () => {
     if (nameInput !== "" && socket) {
