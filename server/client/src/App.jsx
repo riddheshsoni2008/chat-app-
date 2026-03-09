@@ -1,23 +1,37 @@
 import { useState, useEffect } from "react";
 import { io } from "socket.io-client";
 
-const socket = io("https://chat-app-olcd.onrender.com");
 function App() {
+  const [socket, setSocket] = useState(null);
   const [username, setUsername] = useState("");
   const [nameInput, setNameInput] = useState("");
-  const [room, setRoom] = useState("riddhesh-riya");
+  const [room] = useState("riddhesh-riya");
   const [message, setMessage] = useState("");
   const [chat, setChat] = useState([]);
 
+  // socket connect
+  useEffect(() => {
+    const newSocket = io("https://chat-app-olcd.onrender.com");
+    setSocket(newSocket);
+
+    newSocket.on("receive_message", (data) => {
+      setChat((prev) => [...prev, data]);
+    });
+
+    return () => {
+      newSocket.disconnect();
+    };
+  }, []);
+
   const joinChat = () => {
-    if (nameInput !== "") {
+    if (nameInput !== "" && socket) {
       setUsername(nameInput);
       socket.emit("join_room", room);
     }
   };
 
   const sendMessage = () => {
-    if (message === "") return;
+    if (message === "" || !socket) return;
 
     const messageData = {
       room: room,
@@ -27,20 +41,11 @@ function App() {
 
     socket.emit("send_message", messageData);
 
+    // show own message
     setChat((prev) => [...prev, messageData]);
 
     setMessage("");
   };
-
-  useEffect(() => {
-    const handler = (data) => {
-      setChat((prev) => [...prev, data]);
-    };
-
-    socket.on("receive_message", handler);
-
-    return () => socket.off("receive_message", handler);
-  }, []);
 
   if (!username) {
     return (
