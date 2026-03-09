@@ -30,6 +30,8 @@ function App() {
 
     socket.emit("send_message", messageData);
 
+    setChat((prev) => [...prev, messageData]);
+
     setMessage("");
   };
 
